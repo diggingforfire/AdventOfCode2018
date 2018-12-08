@@ -7,7 +7,7 @@ namespace _02._02
 {
 	class Program
 	{
-		static void Main(string[] args)
+		static void Main()
 		{
 			var lines = File.ReadAllLines("input.txt");
 
