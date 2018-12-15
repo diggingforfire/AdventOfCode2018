@@ -38,7 +38,7 @@ namespace _04._01
 							)
 						
 					).GroupBy(x => x).OrderByDescending(zg => zg.Count()).FirstOrDefault()?.Key
-				}).OrderByDescending(z => z.FavouriteMinuteToSleep).Select(p => int.Parse(p.GuardId) * p.FavouriteMinuteToSleep).First();
+				}).OrderByDescending(z => z.TotalMinutesAsleep).Select(p => int.Parse(p.GuardId) * p.FavouriteMinuteToSleep).First();
 
 			Console.WriteLine(result);
 
