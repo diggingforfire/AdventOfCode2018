@@ -1,12 +1,51 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
 
 namespace _04._02
 {
 	class Program
 	{
-		static void Main(string[] args)
+		static void Main()
 		{
-			Console.WriteLine("Hello World!");
+			int groupKey = 0;
+
+			var result = File.ReadAllLines("input.txt")
+				.Select(shift => new
+				{
+					FallsAsleep = shift.EndsWith("asleep"),
+					GuardId = shift.Contains("Guard")
+						? shift.Substring(shift.IndexOf("#") + 1, shift.IndexOf("begins") - shift.IndexOf("#") - 1)
+						: string.Empty,
+					Timestamp = DateTime.Parse(shift.Substring(1, shift.IndexOf(']') - 1))
+				})
+				.Select(shift => new
+				{
+					shift.FallsAsleep,
+					shift.GuardId,
+					Timestamp = shift.Timestamp.Hour > 0 ? shift.Timestamp.Date.AddDays(1) : shift.Timestamp
+				})
+				.OrderBy(shift => shift.Timestamp)
+				.GroupBy(grp => grp.GuardId != string.Empty ? ++groupKey : groupKey) // Group in blocks of guard + additional entries
+				.GroupBy(grp => grp.First().GuardId) // Merge all guards
+
+				.Select(g => new
+				 {
+					 GuardId = g.Key,
+					 FavouriteMinuteToSleep = g.SelectMany(gg =>
+						 gg.ToList().SelectMany((ggg, i) =>
+							 ggg.FallsAsleep && i + 1 < gg.ToList().Count
+								 ? Enumerable.Range(ggg.Timestamp.Minute,
+									 gg.ToList()[i + 1].Timestamp.Minute - ggg.Timestamp.Minute)
+								 : Array.Empty<int>()
+						 )
+
+					).GroupBy(x => x).OrderByDescending(zg => zg.Count()).FirstOrDefault()?.Key ?? 0
+				 }).OrderByDescending(z => z.FavouriteMinuteToSleep).Select(p => int.Parse(p.GuardId) * p.FavouriteMinuteToSleep).First();
+
+			Console.WriteLine(result);
+
+			Console.ReadKey();
 		}
 	}
 }
