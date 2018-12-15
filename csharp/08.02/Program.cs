@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace _08._01
+namespace _08._02
 {
 	class Program
 	{
@@ -17,9 +17,9 @@ namespace _08._01
 
 			var root = ParseTree(headers);
 
-			var metaDataSum = root.GetMetaDataSum();
+			var value = root.GetValue();
 
-			Console.WriteLine(metaDataSum);
+			Console.WriteLine(value);
 
 			Console.ReadKey();
 		}
@@ -35,14 +35,19 @@ namespace _08._01
 			public List<Node> Children { get; }
 			public int[] Metadata { get; set; }
 
-			public int GetMetaDataSum()
-			{
-				return Children.Sum(c => c.GetMetaDataSum()) + Metadata.Sum();
-			}
-
 			public int GetOffset()
 			{
 				return Children.Sum(c => c.GetOffset()) + Metadata.Length + 2;
+			}
+
+			public int GetValue()
+			{
+				if (!Children.Any())
+				{
+					return Metadata.Sum();
+				}
+
+				return Metadata.Sum(i => i - 1 < Children.Count ? Children[i - 1].GetValue() : 0);
 			}
 		}
 
@@ -63,7 +68,7 @@ namespace _08._01
 			}
 
 			var metaDataOffset = root.GetOffset() - root.Metadata.Length;
- 
+
 			root.Metadata = headers.Skip(metaDataOffset).Take(numberOfMetaDatas).ToArray();
 
 			return root;
